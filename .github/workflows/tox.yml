@@ -1,0 +1,19 @@
+name: tox
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  tox:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    - name: install tox
+      run: pip install --upgrade pip setuptools tox virtualenv
+    - name: run tox
+      run: tox -e py
