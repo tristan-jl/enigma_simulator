@@ -1,8 +1,8 @@
-from enigma_simulator.components import char_to_vec
 from enigma_simulator.components import get_reflector
 from enigma_simulator.components import get_rotor
 from enigma_simulator.components import Plugboard
-from enigma_simulator.components import vec_to_char
+from enigma_simulator.utils import char_to_vec
+from enigma_simulator.utils import vec_to_char
 
 
 class Enigma:

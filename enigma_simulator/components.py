@@ -7,6 +7,9 @@ from typing import TypedDict
 import numpy as np
 from numpy.linalg import matrix_power
 
+from enigma_simulator.utils import char_to_int
+from enigma_simulator.utils import encoding_to_transform
+
 WHITESPACE_REGEX = re.compile("[^a-zA-Z]")
 
 
@@ -199,25 +202,3 @@ def get_reflector(reflector_type: str) -> Reflector:
         return Reflector("FVPJIAOYEDRZXWGCTKUQSBNMHL")
     else:
         return Reflector("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-
-def char_to_vec(c: str) -> np.ndarray:
-    v = np.zeros(26, dtype=int)
-    v[ord(c.upper()) - 65] = 1
-    return v
-
-
-def vec_to_char(v: np.ndarray) -> str:
-    return chr(np.where(v == 1)[0][0] + 65)
-
-
-def char_to_int(c: str) -> int:
-    return ord(c.upper()) - 65
-
-
-def int_to_char(i: int) -> str:
-    return chr(i + 65)
-
-
-def encoding_to_transform(encoding: str) -> np.ndarray:
-    return np.array([char_to_vec(c) for c in encoding]).transpose()
