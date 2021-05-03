@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enigma_simulator.components import get_reflector
 from enigma_simulator.components import get_rotor
 from enigma_simulator.components import Plugboard

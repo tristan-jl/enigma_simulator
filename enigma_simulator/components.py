@@ -1,14 +1,20 @@
 from __future__ import annotations
 
 import re
+import sys
 from typing import Callable
-from typing import TypedDict
 
 import numpy as np
 from numpy.linalg import matrix_power
 
 from enigma_simulator.utils import char_to_int
 from enigma_simulator.utils import encoding_to_transform
+
+if sys.version_info >= (3, 8):  # pragma: no cover
+    from typing import TypedDict
+else:  # pragma: no cover
+    from typing_extensions import TypedDict
+
 
 WHITESPACE_REGEX = re.compile("[^a-zA-Z]")
 
