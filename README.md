@@ -6,22 +6,27 @@ with the common 8 rotors and 3 reflectors.
 inspired by [this video](https://www.youtube.com/watch?v=RzWB5jL5RX0).
 
 The transformation of each letter is implemented as a product of permutations
-[(Rejewski, 1980)](https://www.worldcat.org/title/annales-polonici-mathematici/oclc/889386602),
-in this case 26x26 matrices. The transform, in this formulation, can
-therefore be expressed as (from Wikipedia):
+[(Rejewski, 1980)](https://www.impan.pl/pl/wydawnictwa/czasopisma-i-serie-wydawnicze/applicationes-mathematicae/all/16/4/102945/an-application-of-the-theory-of-permutations-in-breaking-the-enigma-cipher),
+in this case 26x26 matrices. The transform, *E*, in this formulation, can
+therefore be expressed as:
 
-![Enigma Transform](https://wikimedia.org/api/rest_v1/media/math/render/svg/e4244f8b3fb7118985e4f0b4b6accd4b7f5677b7)
+![Enigma Transform](docs/equation.svg)
 
-Can be used to encrypt/decrypt messages ('X' was used to replace spaces):
+where *P* is the plugboard, *L*, *M* and *R* are the left, middle and right rotors
+respectively, *U* is the reflector and *p* is the cyclic permutation of the mapping of A
+to B, B to C, etc. *a*, *b* and *c* are the rotations of each rotor as caused when a key
+was pressed.
+
+Can be used to encrypt/decrypt messages ('X' was used to replace spaces) as such:
 ```python
-from enigma import Enigma
+from enigma_simulator.enigma import Enigma
 
 
 # Encrypting
-enigma1 = Enigma(["I", "II", "III"], [0, 0, 0], [0, 0, 0], "B", "AD")
-enigma1.encrypt("HELLOXWORLD") # Returns "ILBADSQQAPK"
+enigma1 = Enigma(["I", "II", "III"], [1, 1, 1], "B", "AD", [0, 0, 0])
+enigma1.encrypt("HELLOXWORLD") # Returns "LOFUHZZLZOB"
 
 # Decrypting
-enigma2 = Enigma(["I", "II", "III"], [0, 0, 0], [0, 0, 0], "B", "AD")
-enigma2.encrypt("ILBADSQQAPK") # Returns "HELLOXWORLD" back
+enigma2 = Enigma(["I", "II", "III"], [1, 1, 1], "B", "AD", [0, 0, 0])
+enigma2.encrypt("LOFUHZZLZOB") # Returns "HELLOXWORLD" back
 ```

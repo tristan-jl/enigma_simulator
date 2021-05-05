@@ -37,23 +37,24 @@ class Rotor(Component):
     def __init__(
         self,
         name: str,
-        position: int,
-        ring_setting: int | str,
+        ring_setting: int,
         encoding: str,
         notch_positions: list[str],
+        position: int | str,
     ) -> None:
         self.name = name
-        self.position = position % 26
+        self.ring_setting = ring_setting % 26
 
-        if isinstance(ring_setting, int):
-            self.ring_setting = ring_setting % 26
-        elif isinstance(ring_setting, str):
-            self.ring_setting = char_to_int(ring_setting)
+        if isinstance(position, int):
+            self.position = position % 26
+        elif isinstance(position, str):
+            self.position = char_to_int(position)
         else:
             raise NotImplementedError
 
         self.notch_positions = [(char_to_int(i) - 1) % 26 for i in notch_positions]
 
+        self.initial_encoding = encoding
         generated_transforms = self.generate_transforms(
             encoding_to_transform(encoding), self.ring_setting
         )
@@ -88,11 +89,13 @@ class Rotor(Component):
         permutation = np.diag(np.ones(26, dtype=int))[_list]
 
         return [
-            (
-                matrix_power(permutation, i - ring_setting)
+            np.roll(
+                matrix_power(permutation, i)
                 @ initial_transform
-                @ matrix_power(permutation, -i)
-            ).astype(int)
+                @ matrix_power(permutation, -i),
+                (ring_setting, ring_setting),
+                (0, 1),
+            )
             for i in range(26)
         ]
 
@@ -142,7 +145,7 @@ class Plugboard(Component):
         return transform
 
 
-def get_rotor(name: str, position: int, ring_setting: int) -> Rotor:
+def get_rotor(name: str, ring_setting: int, position: int) -> Rotor:
     class RotorAttribute(TypedDict):
         encoding: str
         notch_positions: list[str]
@@ -192,10 +195,10 @@ def get_rotor(name: str, position: int, ring_setting: int) -> Rotor:
 
     return Rotor(
         name,
-        position,
         ring_setting,
         rotor_attrs["encoding"],
         rotor_attrs["notch_positions"],
+        position,
     )
 
 
