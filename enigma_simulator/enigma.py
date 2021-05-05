@@ -11,13 +11,13 @@ class Enigma:
     def __init__(
         self,
         rotor_names: list[str],
-        rotor_positions: list[int],
         ring_settings: list[int],
         reflector_type: str,
         plugboard_connections: str,
+        rotor_positions: list[int],
     ) -> None:
         self.left_rotor, self.middle_rotor, self.right_rotor = tuple(
-            get_rotor(*i) for i in zip(rotor_names, rotor_positions, ring_settings)
+            get_rotor(*i) for i in zip(rotor_names, ring_settings, rotor_positions)
         )
         self.reflector = get_reflector(reflector_type)
         self.plugboard = Plugboard(plugboard_connections)
@@ -25,6 +25,10 @@ class Enigma:
     def encrypt(self, message: str) -> str:
         encrypted = ""
         for char in list(message):
+            if char == " ":
+                encrypted += " "
+                continue
+
             self.rotate()
 
             vec = char_to_vec(char)
