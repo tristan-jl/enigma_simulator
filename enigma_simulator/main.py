@@ -5,13 +5,22 @@ import sys
 from typing import Sequence
 
 from enigma_simulator import output
+from enigma_simulator.enigma import create_enigma_from_key
 from enigma_simulator.enigma import Enigma
+from enigma_simulator.key import load_key
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     parser = argparse.ArgumentParser(prog="enigma-simulator")
 
+    parser.add_argument(
+        "-k",
+        "--key",
+        type=str,
+        nargs=1,
+        help="Path to key file. Must be a json or a yaml file.",
+    )
     parser.add_argument(
         "-n",
         "--names",
@@ -67,13 +76,19 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
 
-    enigma = Enigma(
-        args.names,
-        args.settings,
-        args.reflector,
-        args.connections,
-        list(args.positions[0]),
-    )
+    if args.key:
+        enigma_key = load_key(args.key[0])
+        enigma = create_enigma_from_key(enigma_key)
+
+    else:
+        enigma = Enigma(
+            args.names,
+            args.settings,
+            args.reflector,
+            args.connections,
+            list(args.positions[0]),
+        )
+
     encrypted = enigma.encrypt(" ".join(args.message))
     output.write_line(encrypted)
 
