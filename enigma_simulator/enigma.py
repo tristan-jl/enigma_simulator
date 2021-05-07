@@ -3,6 +3,7 @@ from __future__ import annotations
 from enigma_simulator.components import get_reflector
 from enigma_simulator.components import get_rotor
 from enigma_simulator.components import Plugboard
+from enigma_simulator.key import EnigmaKey
 from enigma_simulator.utils import char_to_vec
 from enigma_simulator.utils import vec_to_char
 
@@ -55,3 +56,15 @@ class Enigma:
             self.middle_rotor.turnover()
 
         self.right_rotor.turnover()
+
+
+def create_enigma_from_key(
+    key: EnigmaKey, rotor_positions: list[int] = [0, 0, 0]
+) -> Enigma:
+    return Enigma(
+        [i for i in key.rotor_names],
+        key.ring_settings,
+        key.reflector_type,
+        key.plugboard_connections,
+        rotor_positions,
+    )

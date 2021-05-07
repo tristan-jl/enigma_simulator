@@ -3,6 +3,7 @@ covdefaults
 mypy
 numpy
 pre-commit
+pydantic
 pytest
 pytest-cov
 tox

@@ -29,7 +29,7 @@ def argparse_parse_args_spy():
         yield parse_args_mock
 
 
-def test_enigma_settings(argparse_parse_args_spy):
+def test_enigma_command_line_settings(argparse_parse_args_spy):
     args = [
         "-n",
         "I",
@@ -43,6 +43,38 @@ def test_enigma_settings(argparse_parse_args_spy):
         "B",
         "-c",
         "AB HF",
+        "AAA",
+        "hello",
+    ]
+
+    main.main(args)
+    argparse_parse_args_spy.assert_has_calls([mock.call(args)])
+
+
+def test_enigma_key_file_settings(tmpdir, argparse_parse_args_spy):
+    p = tmpdir / "test.json"
+    p.write_text(
+        """{
+    "rotor_names": [
+        "I",
+        "II",
+        "III"
+    ],
+    "ring_settings": [
+        1,
+        4,
+        6
+    ],
+    "reflector_type": "B",
+    "plugboard_connections": "AB NK"
+}
+""",
+        encoding=None,
+    )
+
+    args = [
+        "-k",
+        str(p),
         "AAA",
         "hello",
     ]

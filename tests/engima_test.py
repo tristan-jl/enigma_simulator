@@ -1,6 +1,12 @@
+import numpy as np
 import pytest
 
+from enigma_simulator.enigma import create_enigma_from_key
 from enigma_simulator.enigma import Enigma
+from enigma_simulator.key import EnigmaKey
+from enigma_simulator.key import load_key
+from enigma_simulator.key import ReflectorTypeEnum
+from enigma_simulator.key import RotorNameEnum
 
 
 @pytest.mark.parametrize(
@@ -39,4 +45,79 @@ def test_turnover_and_double_stepping():
         "Y CTMJ MOFPIS WBTX NAHXIZ RUK ZGKXI VSF BWKU CVWH NZK TKDMW WHK MCFX JC PKCYI "
         "IJ KWGP OH FC N PLTF ZRIA YH XT BJOHA SOVG WX GSZMZ GSJ AKVZ QTVWSAPOYZ "
         "VKBTRCO"
+    )
+
+
+def test_create_enigma_from_key():
+    rotor_names = [RotorNameEnum.one, RotorNameEnum.two, RotorNameEnum.three]
+    ring_settings = [1, 2, 3]
+    reflector_type = ReflectorTypeEnum.b
+    plugboard_connections = "AB GD"
+
+    enigma_key = EnigmaKey(
+        rotor_names=rotor_names,
+        ring_settings=ring_settings,
+        reflector_type=reflector_type,
+        plugboard_connections=plugboard_connections,
+    )
+
+    enigma = create_enigma_from_key(enigma_key)
+
+    assert enigma.left_rotor.name == rotor_names[0]
+    assert enigma.middle_rotor.name == rotor_names[1]
+    assert enigma.right_rotor.name == rotor_names[2]
+
+    assert enigma.left_rotor.ring_setting == ring_settings[0]
+    assert enigma.middle_rotor.ring_setting == ring_settings[1]
+    assert enigma.right_rotor.ring_setting == ring_settings[2]
+
+    assert isinstance(enigma.reflector.transform, np.ndarray)
+    assert isinstance(enigma.plugboard.transform, np.ndarray)
+
+
+@pytest.mark.parametrize(
+    ("file_type", "contents"),
+    (
+        (
+            "json",
+            """{
+    "rotor_names": [
+        "I",
+        "II",
+        "III"
+    ],
+    "ring_settings": [
+        1,
+        4,
+        6
+    ],
+    "reflector_type": "B",
+    "plugboard_connections": "AB NK"
+}
+""",
+        ),
+        (
+            "yaml",
+            """rotor_names:
+  - "I"
+  - "II"
+  - "III"
+ring_settings:
+  - 1
+  - 4
+  - 6
+reflector_type: B
+plugboard_connections: "AB NK"
+""",
+        ),
+    ),
+)
+def test_load_key(tmpdir, file_type, contents):
+    p = tmpdir / f"test.{file_type}"
+    p.write_text(contents, encoding=None)
+    assert load_key(str(p)) == EnigmaKey(
+        rotor_names=["I", "II", "III"],
+        ring_settings=[1, 4, 6],
+        reflector_type="B",
+        plugboard_connections="AB NK",
     )
