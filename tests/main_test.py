@@ -29,7 +29,7 @@ def argparse_parse_args_spy():
         yield parse_args_mock
 
 
-def test_enigma_command_line_settings(argparse_parse_args_spy):
+def test_cli_encrypt_message(argparse_parse_args_spy):
     args = [
         "-n",
         "I",
@@ -43,6 +43,7 @@ def test_enigma_command_line_settings(argparse_parse_args_spy):
         "B",
         "-c",
         "AB HF",
+        "message",
         "AAA",
         "hello",
     ]
@@ -51,7 +52,7 @@ def test_enigma_command_line_settings(argparse_parse_args_spy):
     argparse_parse_args_spy.assert_has_calls([mock.call(args)])
 
 
-def test_enigma_key_file_settings(tmpdir, argparse_parse_args_spy):
+def test_cli_encrypt_message_key_file(tmpdir, argparse_parse_args_spy):
     p = tmpdir / "test.json"
     p.write_text(
         """{
@@ -75,8 +76,59 @@ def test_enigma_key_file_settings(tmpdir, argparse_parse_args_spy):
     args = [
         "-k",
         str(p),
+        "message",
         "AAA",
         "hello",
+    ]
+
+    main.main(args)
+    argparse_parse_args_spy.assert_has_calls([mock.call(args)])
+
+
+def test_cli_encrypt_transmission(argparse_parse_args_spy):
+    args = [
+        "-n",
+        "I",
+        "II",
+        "III",
+        "-s",
+        "1",
+        "2",
+        "3",
+        "-r",
+        "B",
+        "-c",
+        "AB HF",
+        "transmission",
+        "hello",
+        "--encrypt",
+    ]
+
+    main.main(args)
+    argparse_parse_args_spy.assert_has_calls([mock.call(args)])
+
+
+def test_cli_decrypt_transmission(argparse_parse_args_spy):
+    args = [
+        "-n",
+        "I",
+        "II",
+        "III",
+        "-s",
+        "1",
+        "2",
+        "3",
+        "-r",
+        "B",
+        "-c",
+        "AB HF",
+        "transmission",
+        "-p",
+        "BFD",
+        "-m",
+        "NMG",
+        "hello",
+        "--decrypt",
     ]
 
     main.main(args)

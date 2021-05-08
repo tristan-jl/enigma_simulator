@@ -48,6 +48,42 @@ def test_turnover_and_double_stepping():
     )
 
 
+def test_update_enigma_rotor_positions():
+    enigma = Enigma(["I", "II", "III"], [1, 1, 1], "B", "", [0, 0, 0])
+    encrypted1 = enigma.encrypt("A")
+
+    enigma.update_rotor_positions([0, 0, 0])
+    encrypted2 = enigma.encrypt("A")
+
+    assert encrypted1 == encrypted2 == "E"
+
+
+def test_enigma_transmission_encryption():
+    start_position, message_key, message = "WZA", "SXT", "HELLOHOWAREYOU"
+    enigma = Enigma(["I", "II", "III"], [1, 1, 1], "B", "AB FD CH LO PW", [0, 0, 0])
+    transmission = enigma.encrypt_transmission(message, start_position, message_key)
+
+    assert transmission == ("WZA", "IGI", "EVIVKEGIPXXOQZ")
+
+
+def test_enigma_transmission_encryption_provides_defaults():
+    message = "HELLOHOWAREYOU"
+    enigma = Enigma(["I", "II", "III"], [1, 1, 1], "B", "AB FD CH LO PW", [0, 0, 0])
+    transmission = enigma.encrypt_transmission(message)
+
+    assert len(transmission[0]) == 3
+    assert len(transmission[1]) == 3
+    assert len(transmission[2]) == len(message)
+
+
+def test_enigma_transmission_decryption():
+    start_position, encrypted_key, message = "WZA", "IGI", "EVIVKEGIPXXOQZ"
+    enigma = Enigma(["I", "II", "III"], [1, 1, 1], "B", "AB FD CH LO PW", [0, 0, 0])
+    transmission = enigma.decrypt_transmission(start_position, encrypted_key, message)
+
+    assert transmission == "HELLOHOWAREYOU"
+
+
 def test_create_enigma_from_key():
     rotor_names = [RotorNameEnum.one, RotorNameEnum.two, RotorNameEnum.three]
     ring_settings = [1, 2, 3]
