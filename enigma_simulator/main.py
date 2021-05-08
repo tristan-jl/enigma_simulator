@@ -12,7 +12,14 @@ from enigma_simulator.key import load_key
 
 def main(argv: Sequence[str] | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
-    parser = argparse.ArgumentParser(prog="enigma-simulator")
+    parser = argparse.ArgumentParser(
+        prog="enigma-simulator",
+        description=(
+            "Encrypt or decrypt a simple message or transmission using a simulated "
+            "Enigma machine. The settings of the machine can be passed in "
+            "individually, or can pass in an 'Enigma key' file (see below)."
+        ),
+    )
 
     parser.add_argument(
         "-k",
@@ -61,18 +68,52 @@ def main(argv: Sequence[str] | None = None) -> int:
             "letters A and B, and the letters C and D."
         ),
     )
-    parser.add_argument(
+
+    subparsers = parser.add_subparsers(help="sub-command help")
+
+    message_parser = subparsers.add_parser(
+        "message", help="Encrypt or decrypt a simple message."
+    )
+    message_parser.add_argument(
         "positions",
         type=str,
         nargs=1,
         help="Positions of the 3 rotors. Should be a 3-length string, e.g. 'ABC'.",
     )
-    parser.add_argument(
+    message_parser.add_argument(
         "message",
         type=str,
         nargs="*",
         help="Message to encrypt/decrypt. Spaces are kept.",
     )
+
+    transmission_parser = subparsers.add_parser(
+        "transmission",
+        help="Encrypt or decrypt a transmission. See README for details.",
+    )
+    transmission_parser.add_argument(
+        "-p",
+        "--positions",
+        type=str,
+        nargs="?",
+        help="Positions of the 3 rotors. Should be a 3-length string, e.g. 'ABC'.",
+    )
+    transmission_parser.add_argument(
+        "-m",
+        "--message-key",
+        type=str,
+        nargs="?",
+        help="Secret message key. Should be a 3-length string, e.g. 'ABC'.",
+    )
+    transmission_parser.add_argument(
+        "message",
+        type=str,
+        nargs="*",
+        help="Message to encrypt/decrypt. Spaces are kept.",
+    )
+    group = transmission_parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--encrypt", action="store_true", help="Encryption mode.")
+    group.add_argument("--decrypt", action="store_false", help="Decryption mode.")
 
     args = parser.parse_args(argv)
 
@@ -81,16 +122,43 @@ def main(argv: Sequence[str] | None = None) -> int:
         enigma = create_enigma_from_key(enigma_key)
 
     else:
+        positions = (
+            list(
+                args.positions[0]
+                if isinstance(args.positions, list)
+                else args.positions
+            )
+            if args.positions is not None
+            else ["A", "A", "A"]
+        )
         enigma = Enigma(
             args.names,
             args.settings,
             args.reflector,
             args.connections,
-            list(args.positions[0]),
+            positions,
         )
 
-    encrypted = enigma.encrypt(" ".join(args.message))
-    output.write_line(encrypted)
+    message = " ".join(args.message)
+
+    if "encrypt" in args:  # transmission
+        print(args.positions, args.message_key, message)
+        if args.encrypt:
+            output.write_line(
+                " ".join(
+                    enigma.encrypt_transmission(
+                        message, args.positions, args.message_key
+                    )
+                )
+            )
+        else:
+            output.write_line(
+                enigma.decrypt_transmission(args.positions, args.message_key, message)
+            )
+
+    else:
+        encrypted = enigma.encrypt(message)
+        output.write_line(encrypted)
 
     return 0
 
