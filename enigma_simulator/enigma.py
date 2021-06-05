@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 import numpy as np
 
 from enigma_simulator.components import get_reflector
@@ -11,6 +13,8 @@ from enigma_simulator.utils import char_to_vec
 from enigma_simulator.utils import int_to_char
 from enigma_simulator.utils import vec_to_char
 
+WHITESPACE_REGEX = re.compile("[^a-zA-Z]")
+
 
 class Enigma:
     def __init__(
@@ -21,19 +25,24 @@ class Enigma:
         plugboard_connections: str,
         rotor_positions: list[int] | list[str],
     ) -> None:
-        print(rotor_names, ring_settings, rotor_positions)
         self.left_rotor, self.middle_rotor, self.right_rotor = tuple(
             get_rotor(*i) for i in zip(rotor_names, ring_settings, rotor_positions)
         )
         self.reflector = get_reflector(reflector_type)
         self.plugboard = Plugboard(plugboard_connections)
 
-    def encrypt(self, message: str) -> str:
+    def encrypt(
+        self,
+        message: str,
+        *,
+        leave_whitespace=True,
+    ) -> str:
         encrypted = ""
         for char in list(message):
-            if char == " ":
-                encrypted += " "
-                continue
+            if leave_whitespace:
+                if WHITESPACE_REGEX.match(char):
+                    encrypted += char
+                    continue
 
             self.rotate()
 
@@ -56,8 +65,10 @@ class Enigma:
     def encrypt_transmission(
         self,
         message: str,
+        *,
         start_position: str | None = None,
         message_key: str | None = None,
+        leave_whitespace=True,
     ) -> tuple[str, str, str]:
         if start_position is None:
             rand_ints = np.random.randint(0, 26, size=3)
@@ -78,7 +89,11 @@ class Enigma:
 
         self.update_rotor_positions(_message_key)
 
-        return (_start_position, encrypted_key, self.encrypt(message))
+        return (
+            _start_position,
+            encrypted_key,
+            self.encrypt(message, leave_whitespace=leave_whitespace),
+        )
 
     def decrypt_transmission(
         self, start_position: str, encrypted_key: str, message: str

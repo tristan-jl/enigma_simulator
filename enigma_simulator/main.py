@@ -142,7 +142,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     message = " ".join(args.message)
 
     if "encrypt" in args:  # transmission
-        print(args.positions, args.message_key, message)
         if args.encrypt:
             output.write_line(
                 " ".join(
